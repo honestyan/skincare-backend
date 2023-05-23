@@ -5,7 +5,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const router = require("./routes");
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
