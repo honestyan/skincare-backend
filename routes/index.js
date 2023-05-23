@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-require("dotenv").config();
+require("dotenv-vault-core").config();
+const { WELCOME_MESSAGE } = process.env;
 
 // Require the controllers WHICH WE DID NOT CREATE YET!!
 // const auth = require("./auth");
@@ -8,7 +9,7 @@ require("dotenv").config();
 router.get("/", (req, res) => {
   return res.status(200).json({
     status: true,
-    message: `Welcome to Skincare API. ${process.env._TEST_ENV}`,
+    message: `${WELCOME_MESSAGE}`,
   });
 });
 

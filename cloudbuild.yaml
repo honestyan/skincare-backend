@@ -19,5 +19,7 @@ steps:
       - "--platform"
       - "managed"
       - "--allow-unauthenticated"
+      - "--set-env-vars"
+      - "DOTENV_KEY=$_DOTENV_KEY"
 images:
   - "gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA"
