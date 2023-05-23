@@ -30,7 +30,7 @@ app.use((err, req, res, next) => {
 });
 
 const server = app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on PORT ${PORT}`);
 });
 
 module.exports = server;
