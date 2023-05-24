@@ -16,6 +16,7 @@ app.use(router);
 //404 handler
 app.use((req, res, next) => {
   return res.status(404).json({
+    code: 404,
     success: false,
     message: "Are you lost?",
   });
@@ -25,6 +26,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   console.log(err);
   return res.status(500).json({
+    code: 500,
     success: false,
     message: err.message,
   });

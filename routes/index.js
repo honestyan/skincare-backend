@@ -7,6 +7,7 @@ const auth = require("./auth.js");
 
 router.get("/", (req, res) => {
   return res.status(200).json({
+    code: 200,
     success: true,
     message: `${WELCOME_MESSAGE}`,
   });

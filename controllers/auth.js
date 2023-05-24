@@ -54,7 +54,7 @@ module.exports = {
         return res.status(200).json({
           code: 200,
           success: true,
-          message: "success: create user",
+          message: "success create user",
           data: {
             name: user.name,
             email: user.email,
