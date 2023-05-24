@@ -6,7 +6,5 @@ WORKDIR /opt/app
 COPY package.json .
 RUN npm install
 COPY / .
-RUN npm install -g sequelize-cli
-RUN npm run migrate-seed
 EXPOSE 5000
 CMD [ "npm", "start"]
