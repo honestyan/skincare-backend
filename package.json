@@ -4,11 +4,10 @@
   "description": "Backend handle on skincare app.",
   "main": "index.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "npx sequelize db:migrate && npx sequelize db:seed:all && node app.js",
     "dev": "nodemon app.js",
     "lint": "eslint --fix src",
-    "test": "jest",
-    "migrate-seed": "sequelize-cli db:migrate && sequelize-cli db:seed:all"
+    "test": "jest"
   },
   "keywords": [],
   "author": "honestyan <honestyan0708@gmail.com> (https://honestyan.dev)",
