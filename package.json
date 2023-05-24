@@ -7,7 +7,8 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "lint": "eslint --fix src",
-    "test": "jest"
+    "test": "jest",
+    "migrate-seed": "sequelize-cli db:migrate && sequelize-cli db:seed:all"
   },
   "keywords": [],
   "author": "honestyan <honestyan0708@gmail.com> (https://honestyan.dev)",
