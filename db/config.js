@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv-vault-core").config();
 
 const {
   DB_USERNAME,
