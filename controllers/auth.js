@@ -43,7 +43,7 @@ module.exports = {
       );
       let htmlEmail = await utilEmail.getHtml("activation-mail.ejs", {
         name: user.name,
-        link: `${BASE_URL}/verify?token=${token}`,
+        link: `${BASE_URL}/auth/verify?token=${token}`,
       });
       const sendMail = await utilEmail.sendEmail(
         user.email,
