@@ -56,7 +56,7 @@ module.exports = {
           success: true,
           message: "success: create user",
           data: {
-            name: user.username,
+            name: user.name,
             email: user.email,
           },
         });
