@@ -196,16 +196,12 @@ module.exports = {
         });
       }
 
-      const otpToDb = await User.update(
+      const insertOtpToUser = await User.update(
         { otp: otp },
-        {
-          where: {
-            email: email,
-          },
-        }
+        { where: { email: user.email } }
       );
 
-      if (!otpToDb) {
+      if (!insertOtpToUser) {
         return res.status(500).json({
           code: 500,
           success: false,
@@ -216,7 +212,6 @@ module.exports = {
       const tokenOtp = jwt.sign(
         {
           email: user.email,
-          otp: user.otp,
         },
         JWT_SECRET_KEY
       );
@@ -240,7 +235,7 @@ module.exports = {
       const decoded = jwt.verify(token, JWT_SECRET_KEY);
       const user = await User.findOne({ where: { email: decoded.email } });
 
-      if (!user || user.otp !== decoded.otp) {
+      if (!user || user.otp !== otp) {
         return res.status(401).json({
           code: 401,
           success: false,
@@ -251,7 +246,7 @@ module.exports = {
       const tokenReset = jwt.sign(
         {
           email: user.email,
-          otp: user.otp,
+          otp: otp,
           action: "resetPwd",
         },
         JWT_SECRET_KEY
@@ -260,7 +255,7 @@ module.exports = {
       return res.status(200).json({
         code: 200,
         success: true,
-        message: "success send otp to email",
+        message: "otp valid, please reset your password!",
         data: {
           token: tokenReset,
         },
