@@ -38,7 +38,6 @@ module.exports = {
           data: null,
         });
       }
-
       next(err);
     }
   },

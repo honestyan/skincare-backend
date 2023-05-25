@@ -4,12 +4,24 @@ const app = express();
 const cors = require("cors");
 const morgan = require("morgan");
 const router = require("./routes");
+const multer = require("multer");
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
-app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
+
+const multerMid = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    // no larger than 5mb.
+    fileSize: 5 * 1024 * 1024,
+  },
+});
+
+app.disable("x-powered-by");
+app.use(multerMid.single("file"));
 app.set("view engine", "ejs");
 app.use(router);
 

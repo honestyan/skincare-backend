@@ -3,13 +3,19 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.addColumn("Users", "otp", {
-      type: Sequelize.STRING,
-      allowNull: true,
-    });
+    return Promise.all([
+      queryInterface.addColumn(
+        "Users", // table name
+        "otp", // new field name
+        {
+          type: Sequelize.STRING,
+          allowNull: true,
+        }
+      ),
+    ]);
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeColumn("Users", "otp");
+    return Promise.all([queryInterface.removeColumn("Users", "otp")]);
   },
 };
