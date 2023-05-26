@@ -6,13 +6,20 @@ const { JWT_SECRET_KEY } = process.env;
 module.exports = {
   mustLogin: async (req, res, next) => {
     try {
+      if (!req.headers.authorization) {
+        return res.status(401).json({
+          code: 401,
+          success: false,
+          message: "you're not authorized!",
+        });
+      }
+
       const token = req.headers.authorization.split(" ")[1];
       if (!token) {
         return res.status(401).json({
           code: 401,
           success: false,
           message: "you're not authorized!",
-          data: null,
         });
       }
 
@@ -35,7 +42,6 @@ module.exports = {
           code: 401,
           success: false,
           message: err.message,
-          data: null,
         });
       }
       next(err);
