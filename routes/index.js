@@ -5,6 +5,7 @@ const { WELCOME_MESSAGE } = process.env;
 
 const auth = require("./auth.js");
 const upload = require("./upload.js");
+const userSkin = require("./userSkin.js");
 
 router.get("/", (req, res) => {
   return res.status(200).json({
@@ -16,5 +17,6 @@ router.get("/", (req, res) => {
 
 router.use("/auth", auth);
 router.use("/upload", upload);
+router.use("/userSkin", userSkin);
 
 module.exports = router;
