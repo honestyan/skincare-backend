@@ -162,6 +162,74 @@ module.exports = {
     }
   },
 
+  googleOauth: async (req, res, next) => {
+    try {
+      const { credential } = req.body;
+
+      if (!credential) {
+        return res.status(401).json({
+          code: 401,
+          success: false,
+          message: "invalid credential!",
+        });
+      }
+
+      try {
+        var credentialDecode = JSON.parse(
+          Buffer.from(credential.split(".")[1], "base64").toString()
+        );
+      } catch (err) {
+        return res.status(401).json({
+          code: 401,
+          success: false,
+          message: "invalid credential!",
+        });
+      }
+
+      var userExistGoogle = await User.findOne({
+        where: { email: credentialDecode.email },
+      });
+
+      if (!userExistGoogle) {
+        var userExistGoogle = await User.create({
+          email: credentialDecode.email,
+          username: credentialDecode.email.split("@")[0],
+          password: "",
+          name: credentialDecode.name,
+          phone: "",
+          userType: userType.google,
+          isActive: true,
+        });
+      }
+
+      const token = jwt.sign(
+        {
+          id: userExistGoogle.id,
+          username: userExistGoogle.username,
+          email: userExistGoogle.email,
+          name: userExistGoogle.name,
+          phone: userExistGoogle.phone,
+          userType: userExistGoogle.userType,
+        },
+        JWT_SECRET_KEY
+      );
+
+      return res.status(200).json({
+        code: 200,
+        success: true,
+        message: "success login",
+        data: {
+          token: token,
+          userId: userExistGoogle.id,
+          name: userExistGoogle.name,
+          email: userExistGoogle.email,
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
   forgotPassword: async (req, res, next) => {
     try {
       const { email } = req.body;
