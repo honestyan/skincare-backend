@@ -29,6 +29,7 @@ module.exports = {
         userType: userType.basic,
         isActive: false,
       });
+
       const token = jwt.sign(
         {
           id: user.id,
@@ -41,21 +42,49 @@ module.exports = {
         },
         JWT_SECRET_KEY
       );
-      let htmlEmail = await utilEmail.getHtml("activation-mail.ejs", {
+
+      //send otp to email
+      const otp = Math.floor(100000 + Math.random() * 900000);
+
+      const htmlEmail = await utilEmail.getHtml("otp-mail.ejs", {
         name: user.name,
-        link: `${BASE_URL}/auth/verify?token=${token}`,
+        otp: otp,
       });
+
       const sendMail = await utilEmail.sendEmail(
         user.email,
-        "Email Verification",
+        "Activation OTP",
         htmlEmail
       );
-      if (user && sendMail) {
+
+      if (!sendMail) {
+        return res.status(500).json({
+          code: 500,
+          success: false,
+          message: "failed send email!",
+        });
+      }
+
+      const insertOtpToUser = await User.update(
+        { otp: otp },
+        { where: { email: user.email } }
+      );
+
+      if (!insertOtpToUser) {
+        return res.status(500).json({
+          code: 500,
+          success: false,
+          message: "failed update otp to database!",
+        });
+      }
+
+      if (user && sendMail && insertOtpToUser) {
         return res.status(200).json({
           code: 200,
           success: true,
           message: "success create user",
           data: {
+            token: token,
             name: user.name,
             email: user.email,
           },
@@ -69,28 +98,38 @@ module.exports = {
 
   verify: async (req, res, next) => {
     try {
-      const { token } = req.query;
-      console.log(token);
+      const { token, otp } = req.body;
       const decoded = jwt.verify(token, JWT_SECRET_KEY);
+      const user = await User.findOne({
+        where: { email: decoded.email },
+      });
 
-      const user = await User.findOne({ where: { id: decoded.id } });
-
-      if (user) {
-        await User.update(
-          { isActive: true },
-          {
-            where: {
-              id: decoded.id,
-            },
-          }
-        );
-
-        return res.status(200).json({
-          code: 200,
-          success: true,
-          message: "success verify email",
+      if (!user || user.otp !== otp) {
+        return res.status(401).json({
+          code: 401,
+          success: false,
+          message: "invalid OTP or email!",
         });
       }
+
+      const updateUser = await User.update(
+        { isActive: true, otp: null },
+        { where: { email: decoded.email } }
+      );
+
+      if (!updateUser) {
+        return res.status(500).json({
+          code: 500,
+          success: false,
+          message: "failed update user!",
+        });
+      }
+
+      return res.status(200).json({
+        code: 200,
+        success: true,
+        message: "success verify email!",
+      });
     } catch (err) {
       next(err);
     }
@@ -105,7 +144,6 @@ module.exports = {
       const user = await User.findOne({ where: { email: email } });
 
       if (!emailRegex.test(email)) {
-        //handle username login
         const user = await User.findOne({ where: { username: email } });
       }
 
