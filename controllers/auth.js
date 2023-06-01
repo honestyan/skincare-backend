@@ -1,4 +1,4 @@
-require("dotenv-vault-core").config();
+require("dotenv").config();
 const { JWT_SECRET_KEY, BASE_URL } = process.env;
 const { User } = require("../models");
 const bcrypt = require("bcrypt");

@@ -1,4 +1,4 @@
-require("dotenv-vault-core").config();
+require("dotenv").config();
 const axios = require("axios");
 const { PREDICT_SKIN_DISEASES_URL } = process.env;
 

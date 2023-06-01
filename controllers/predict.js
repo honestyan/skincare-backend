@@ -1,4 +1,4 @@
-require("dotenv-vault-core").config();
+require("dotenv").config();
 const axios = require("axios");
 const utilCloudStorage = require("../utils/cloudStorage");
 const utilPreprocess = require("../utils/preprocess");

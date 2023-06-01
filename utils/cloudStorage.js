@@ -1,6 +1,6 @@
 const Cloud = require("@google-cloud/storage");
 const { Storage } = Cloud;
-require("dotenv-vault-core").config();
+require("dotenv").config();
 const { SERVICE_KEY, PROJECT_ID, BUCKET_NAME } = process.env;
 const serviceKey = JSON.parse(Buffer.from(SERVICE_KEY, "base64").toString());
 
