@@ -5,7 +5,8 @@ const { SERVICE_KEY, PROJECT_ID, BUCKET_NAME } = process.env;
 const serviceKey = JSON.parse(Buffer.from(SERVICE_KEY, "base64").toString());
 
 module.exports = {
-  uploadImage: async (file) => {
+  // Use "/" in the end of folder name
+  uploadImage: async (file, folder = "") => {
     try {
       const storage = new Storage({
         credentials: serviceKey,
@@ -15,9 +16,13 @@ module.exports = {
       const bucket = storage.bucket(BUCKET_NAME);
 
       const { originalname, buffer } = file;
-      const blob = bucket.file(
-        `${Date.now()}-${originalname.replace(/ /g, "_")}`
-      );
+
+      const filePath = `${folder}${Date.now()}-${originalname.replace(
+        / /g,
+        "_"
+      )}`;
+
+      const blob = bucket.file(filePath);
 
       const blobStream = blob.createWriteStream({
         resumable: false,
@@ -27,7 +32,6 @@ module.exports = {
         blobStream.on("error", (err) => {
           reject(err);
         });
-
         blobStream.on("finish", () => {
           const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
           resolve(publicUrl);
