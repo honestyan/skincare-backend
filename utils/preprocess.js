@@ -14,9 +14,9 @@ module.exports = {
       const _pixels = [];
       for (let x = 0; x < 224; x++) {
         const offset = (y * 224 + x) * 3;
-        const r = +parseFloat(imageData[offset] / 255).toFixed(3);
-        const g = +parseFloat(imageData[offset + 1] / 255).toFixed(3);
-        const b = +parseFloat(imageData[offset + 2] / 255).toFixed(3);
+        const r = +parseFloat(imageData[offset] / 255);
+        const g = +parseFloat(imageData[offset + 1] / 255);
+        const b = +parseFloat(imageData[offset + 2] / 255);
         _pixels.push([r, g, b]);
       }
       pixels.push(_pixels);
