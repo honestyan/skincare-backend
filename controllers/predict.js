@@ -4,15 +4,11 @@ const utilPreprocess = require("../utils/preprocess");
 const { SKIN_DISEASES_MODEL_URL, SKIN_TYPES_MODEL_URL } = process.env;
 
 module.exports = {
-  predictSkinDiseases: async (req, res, next) => {
+  predictSkin: async (req, res, next) => {
     const file = req.file;
-    // Use "/" in the end of folder name
-    const folder = "skin_diseases/";
-    const publicUrl = await utilCloudStorage
-      .uploadImage(file, folder)
-      .catch((err) => {
-        next(err);
-      });
+    const publicUrl = await utilCloudStorage.uploadImage(file).catch((err) => {
+      next(err);
+    });
 
     const resUpload = await axios({
       url: publicUrl,
@@ -23,98 +19,68 @@ module.exports = {
 
     const imageList = await utilPreprocess.image(image);
 
-    const reqPredict = {
+    const bodyPredict = {
       instances: imageList,
     };
 
-    const resPredict = await axios
-      .post(SKIN_DISEASES_MODEL_URL, reqPredict)
-      .catch((err) => {
-        const { status, data } = err.response;
-        res.status(status).json({
-          code: status,
-          success: false,
-          data,
-        });
-        return null;
+    const reqPredictSkinDiseases = await axios.post(
+      SKIN_DISEASES_MODEL_URL,
+      bodyPredict
+    );
+
+    const reqPredictSkinTypes = await axios.post(
+      SKIN_TYPES_MODEL_URL,
+      bodyPredict
+    );
+
+    const response = await Promise.all([
+      reqPredictSkinDiseases,
+      reqPredictSkinTypes,
+    ]).catch((err) => {
+      const { status, data } = err.response;
+      res.status(status).json({
+        code: status,
+        success: false,
+        data,
       });
-    if (!resPredict) return;
-
-    const labels = ["Acne", "Black Spot", "Puff Eye", "Wrinkle"];
-
-    const predictions = resPredict.data.predictions[0];
-
-    const predictedLabelIndex = predictions.indexOf(Math.max(...predictions));
-    const predictedLabel = labels[predictedLabelIndex];
-
-    const accuracy = predictions[predictedLabelIndex];
-
-    const { status } = resPredict;
-
-    return res.status(status).json({
-      code: status,
-      success: true,
-      data: {
-        label: predictedLabel,
-        accuracy: accuracy,
-        predictions,
-      },
-    });
-  },
-  predictSkinTypes: async (req, res, next) => {
-    const file = req.file;
-    // Use "/" in the end of folder name
-    const folder = "skin_types/";
-    const publicUrl = await utilCloudStorage
-      .uploadImage(file, folder)
-      .catch((err) => {
-        next(err);
-      });
-
-    const resUpload = await axios({
-      url: publicUrl,
-      responseType: "arraybuffer",
+      return null;
     });
 
-    const image = Buffer.from(resUpload.data, "binary");
+    if (!response) return;
 
-    const imageList = await utilPreprocess.image(image);
+    const labelsSkinDiseases = ["Acne", "Black Spot", "Puff Eye", "Wrinkle"];
+    const labelsSkinTypes = ["Dry", "Normal", "Oily", "Sensitive"];
 
-    const reqPredict = {
-      instances: imageList,
-    };
+    const skinDiseasesPredictions = response[0].data.predictions[0];
+    const skinTypesPredictions = response[1].data.predictions[0];
 
-    const resPredict = await axios
-      .post(SKIN_TYPES_MODEL_URL, reqPredict)
-      .catch((err) => {
-        const { status, data } = err.response;
-        res.status(status).json({
-          code: status,
-          success: false,
-          data,
-        });
-        return null;
-      });
-    if (!resPredict) return;
+    const idxSkinDiseases = skinDiseasesPredictions.indexOf(
+      Math.max(...skinDiseasesPredictions)
+    );
+    const idxSkinTypes = skinTypesPredictions.indexOf(
+      Math.max(...skinTypesPredictions)
+    );
 
-    const labels = ["Dry", "Normal", "Oily", "Sensitive"];
+    const predictedSkinDiseasesLabel = labelsSkinDiseases[idxSkinDiseases];
+    const predictedSkinTypesLabel = labelsSkinTypes[idxSkinTypes];
 
-    const predictions = resPredict.data.predictions[0];
+    const skinDiseasesAccuracy = skinDiseasesPredictions[idxSkinDiseases];
+    const skinTypesAccuracy = skinTypesPredictions[idxSkinTypes];
 
-    const predictedLabelIndex = predictions.indexOf(Math.max(...predictions));
-    const predictedLabel = labels[predictedLabelIndex];
-
-    const accuracy = predictions[predictedLabelIndex];
-
-    const { status } = resPredict;
-
-    return res.status(status).json({
-      code: status,
+    return res.status(200).json({
+      code: 200,
       success: true,
       data: {
-        label: predictedLabel,
-        accuracy: accuracy,
-        predictions,
+        skinDiseases: {
+          label: predictedSkinDiseasesLabel,
+          accuracy: skinDiseasesAccuracy,
+          predictions: skinDiseasesPredictions,
+        },
+        skinTypes: {
+          label: predictedSkinTypesLabel,
+          accuracy: skinTypesAccuracy,
+          predictions: skinTypesPredictions,
+        },
       },
     });
   },
