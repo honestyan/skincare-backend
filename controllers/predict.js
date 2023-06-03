@@ -71,6 +71,7 @@ module.exports = {
       code: 200,
       success: true,
       data: {
+        publicUrl,
         skinDiseases: {
           label: predictedSkinDiseasesLabel,
           accuracy: skinDiseasesAccuracy,
