@@ -1,7 +1,10 @@
 const axios = require("axios");
 const utilCloudStorage = require("../utils/cloudStorage");
 const utilPreprocess = require("../utils/preprocess");
-const { SKIN_DISEASES_MODEL_URL, SKIN_TYPES_MODEL_URL } = process.env;
+const { SKIN_DISEASES_MODEL_URL, SKIN_TYPES_MODEL_URL, JWT_SECRET_KEY } =
+  process.env;
+const { UserSkin } = require("../models");
+const jwt = require("jsonwebtoken");
 
 module.exports = {
   predictSkin: async (req, res, next) => {
@@ -66,6 +69,27 @@ module.exports = {
 
     const skinDiseasesAccuracy = skinDiseasesPredictions[idxSkinDiseases];
     const skinTypesAccuracy = skinTypesPredictions[idxSkinTypes];
+
+    //insert to user skin db
+    const token = req.headers.authorization.split(" ")[1];
+
+    const decoded = jwt.verify(token, JWT_SECRET_KEY);
+    const { id } = decoded;
+
+    const userSkin = await UserSkin.create({
+      userId: id,
+      imageUrl: publicUrl,
+      skinDisease: predictedSkinDiseasesLabel,
+      skinType: predictedSkinTypesLabel,
+    });
+
+    if (!userSkin) {
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message: "Failed to add user skin data!",
+      });
+    }
 
     return res.status(200).json({
       code: 200,
