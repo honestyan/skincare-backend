@@ -3,7 +3,8 @@ const utilCloudStorage = require("../utils/cloudStorage");
 const utilPreprocess = require("../utils/preprocess");
 const { SKIN_DISEASES_MODEL_URL, SKIN_TYPES_MODEL_URL, JWT_SECRET_KEY } =
   process.env;
-const { UserSkin } = require("../models");
+const { UserSkin, Product, Category } = require("../models");
+const Op = require("sequelize").Op;
 const jwt = require("jsonwebtoken");
 
 module.exports = {
@@ -70,6 +71,37 @@ module.exports = {
     const skinDiseasesAccuracy = skinDiseasesPredictions[idxSkinDiseases];
     const skinTypesAccuracy = skinTypesPredictions[idxSkinTypes];
 
+    //get product by tag recommendation based on predictedSkinDiseasesLabel and predictedSkinTypesLabel
+
+    const productRecommendation = await Product.findAll({
+      where: {
+        //find product with tag that contains predictedSkinDiseasesLabel and predictedSkinTypesLabel
+        [Op.or]: [
+          {
+            tag: {
+              [Op.like]: `%${predictedSkinDiseasesLabel}%`,
+            },
+          },
+          {
+            tag: {
+              [Op.like]: `%${predictedSkinTypesLabel}%`,
+            },
+          },
+        ],
+      },
+      //also bring category and exlude createdAt and updatedAt
+      include: {
+        model: Category,
+        as: "category",
+        attributes: {
+          exclude: ["createdAt", "updatedAt"],
+        },
+      },
+      attributes: {
+        exclude: ["createdAt", "updatedAt", "categoryId"],
+      },
+    });
+
     //insert to user skin db
     const token = req.headers.authorization.split(" ")[1];
 
@@ -106,6 +138,7 @@ module.exports = {
           accuracy: skinTypesAccuracy,
           predictions: skinTypesPredictions,
         },
+        productRecommendation,
       },
     });
   },

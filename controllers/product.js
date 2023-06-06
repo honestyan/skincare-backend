@@ -3,9 +3,9 @@ const { Product, Category } = require("../models");
 module.exports = {
   addProduct: async (req, res, next) => {
     try {
-      const { name, description, categoryId, price, imageUrl } = req.body;
+      const { name, description, categoryId, price, imageUrl, tag } = req.body;
 
-      if (!name || !description || !categoryId || !price || !imageUrl) {
+      if (!name || !description || !categoryId || !price || !imageUrl || !tag) {
         return res.status(400).json({
           code: 400,
           success: false,
@@ -59,6 +59,7 @@ module.exports = {
         categoryId,
         price,
         imageUrl,
+        tag,
       });
 
       res.status(200).json({
